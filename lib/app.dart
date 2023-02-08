@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_base_bloc/screens/home/home_screen.dart';
 
 class App extends StatelessWidget {
   const App({
@@ -8,14 +9,9 @@ class App extends StatelessWidget {
   final String flavor;
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter App',
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text(flavor),
-        ),
-      ),
-    );
+    return const MaterialApp(
+        title: 'Flutter App',
+        debugShowCheckedModeBanner: false,
+        home: HomeScreen());
   }
 }
