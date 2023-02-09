@@ -20,3 +20,5 @@ flutter run --debug --flavor development -t lib/mains/main_development.dart
 flutter run --debug --flavor staging -t lib/mains/main_staging.dart
 flutter run --debug --flavor production -t lib/mains/main_production.dart
 
+// generation code
+flutter pub run build_runner build --delete-conflicting-outputs

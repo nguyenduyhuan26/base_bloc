@@ -7,23 +7,20 @@ import 'package:permission_handler/permission_handler.dart';
 
 class DialogUtil {
   static Future<ImageSource?> showDialogTakeImage(BuildContext context) async {
-    ImageSource? imageSource;
-    await showCupertinoModalPopup(
+    return await showCupertinoModalPopup(
       context: context,
       builder: (_) {
         return DialogButtom(
           actions: [
             ButtonDialog(
               onPressed: () {
-                imageSource = ImageSource.camera;
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(ImageSource.camera);
               },
               title: 'Camera',
             ),
             ButtonDialog(
               onPressed: () {
-                imageSource = ImageSource.gallery;
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(ImageSource.gallery);
               },
               title: 'Gallery',
             ),
@@ -31,7 +28,6 @@ class DialogUtil {
         );
       },
     );
-    return imageSource;
   }
 
   static void showBottomSheetPermissionPhoto(BuildContext context) {

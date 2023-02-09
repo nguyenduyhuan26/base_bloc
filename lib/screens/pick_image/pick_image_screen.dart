@@ -1,77 +1,54 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_base_bloc/domain/enum/pick_image_status.dart';
+import 'package:flutter_base_bloc/screens/pick_image/bloc/pick_image_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:flutter_base_bloc/utils/dialog_util.dart';
+import 'bloc/pick_image_state.dart';
+import 'components/preview_image.dart';
 
 class PickImageScreen extends StatelessWidget {
   const PickImageScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pick Image'),
-      ),
-      body: Builder(builder: (context) {
-        return Center(
-          child: GestureDetector(
-            onTap: (() => checkPermissionsImagePicker(
-                  context,
-                )),
-            child: const Text('Take Image'),
+    return BlocProvider(
+      create: (_) => PickImageBloc(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Pick Image'),
+        ),
+        body: Center(
+          child: BlocBuilder<PickImageBloc, PickImageState>(
+            builder: ((context, state) {
+              return PreviewImage(path: state.path);
+            }),
           ),
-        );
-      }),
-    );
-  }
-
-  Future<void> checkPermissionsImagePicker(BuildContext context) async {
-    ImageSource? source = await DialogUtil.showDialogTakeImage(context);
-    print(source);
-    if (source != null) {
-      switch (source) {
-        // Check quyền truy cập camera
-        case ImageSource.camera:
-          final cameraPermission = await Permission.camera.request();
-          if (cameraPermission.isGranted) {
-            getImage(source);
-          } else {
-            // ignore: use_build_context_synchronously
-            DialogUtil.showBottomSheetPermissionPhoto(context);
-          }
-          break;
-
-        // Check quyền truy cập photo
-        case ImageSource.gallery:
-          // Android không yêu cầu quyền photo
-          if (Platform.isIOS) {
-            final photoPermission = await Permission.photos.request();
-            if (photoPermission.isGranted) {
-              getImage(source);
-            } else {
-              // ignore: use_build_context_synchronously
-              DialogUtil.showBottomSheetPermissionPhoto(context);
+        ),
+        floatingActionButton: BlocBuilder<PickImageBloc, PickImageState>(
+          builder: (context, state) {
+            IconData icon = Icons.add_a_photo;
+            if (state.status == PickImageStatus.picked) {
+              icon = Icons.crop;
+            } else if (state.status == PickImageStatus.cropped) {
+              icon = Icons.delete;
             }
-          } else if (Platform.isAndroid) {
-            getImage(source);
-          }
-          break;
-
-        default:
-          break;
-      }
-    }
-  }
-
-  Future<void> getImage(ImageSource source) async {
-    final ImagePicker picker = ImagePicker();
-    // Pick an image
-    final PickedFile? image = await picker.getImage(source: source);
-    if (image != null) {
-      print(image.path);
-    }
+            return FloatingActionButton(
+              onPressed: () {
+                if (state.status == PickImageStatus.free) {
+                  context
+                      .read<PickImageBloc>()
+                      .add(PickImage(context: context));
+                } else if (state.status == PickImageStatus.picked) {
+                  context.read<PickImageBloc>().add(CropImage());
+                } else if (state.status == PickImageStatus.cropped) {
+                  context.read<PickImageBloc>().add(DeleteImage());
+                }
+              },
+              child: Icon(icon),
+            );
+          },
+        ),
+      ),
+    );
   }
 }
